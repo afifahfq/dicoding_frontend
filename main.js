@@ -1,12 +1,25 @@
-const books = [];
+const localTotalBookKey = 'LOCAL_TOTAL_BOOKS';
+const localMaximumAttemptsKey = 'LOCAL_MAXIMUM_ATTEMPTS';
+
+let books;
+let keyword = null;
 const RENDER_EVENT = 'render-book';
 
 document.addEventListener('DOMContentLoaded', function () {
-    const submitForm = document.getElementById('inputBook');
-    submitForm.addEventListener('submit', function (event) {
-        event.preventDefault();
-        addBook();
-    });
+  // books = JSON.parse(localStorage.getItem(localTotalBookKey));
+  document.dispatchEvent(new Event(RENDER_EVENT));
+
+  const submitForm = document.getElementById('inputBook');
+  submitForm.addEventListener('submit', function (event) {
+      event.preventDefault();
+      addBook();
+  });
+
+  const searchForm = document.getElementById('searchBook');
+  searchForm.addEventListener('submit', function (event) {
+      event.preventDefault();
+      search();
+  });
 });
 
 function addBook() {
@@ -18,8 +31,17 @@ function addBook() {
     const generatedID = generateId();
     const bookObject = generateBookObject(generatedID, titleBook, authorBook, yearBook, completeBook);
     books.push(bookObject);
+
+    localStorage.removeItem(localTotalBookKey);
+    localStorage.setItem(localTotalBookKey, JSON.stringify(books));
    
     document.dispatchEvent(new Event(RENDER_EVENT));
+}
+
+function search() {
+  keyword = document.getElementById('searchBookTitle').value;
+
+  document.dispatchEvent(new Event(RENDER_EVENT));
 }
 
 function generateId() {
@@ -55,7 +77,9 @@ function makeBook(bookObject) {
     trashButton.textContent = 'Hapus Buku';
   
     trashButton.addEventListener('click', function () {
-      removeBook(bookObject.id);
+      if (confirm("Yakin ingin menghapus buku?")) {
+        removeBook(bookObject.id);
+      }
     });
 
     const buttonContainer = document.createElement('div');
@@ -93,13 +117,15 @@ function makeBook(bookObject) {
 }
 
 document.addEventListener(RENDER_EVENT, function () {
-    console.log(books);
-    const uncompletedBOOKList = document.getElementById('incompleteBookshelfList');
-    uncompletedBOOKList.innerHTML = '';
+  books = JSON.parse(localStorage.getItem(localTotalBookKey));
 
-    const completedBOOKList = document.getElementById('completeBookshelfList');
-    completedBOOKList.innerHTML = '';
-   
+  const uncompletedBOOKList = document.getElementById('incompleteBookshelfList');
+  uncompletedBOOKList.innerHTML = '';
+
+  const completedBOOKList = document.getElementById('completeBookshelfList');
+  completedBOOKList.innerHTML = '';
+  
+  if (keyword == null || keyword == ""){  
     for (const bookItem of books) {
       const bookElement = makeBook(bookItem);
       if (!bookItem.isComplete) {
@@ -108,6 +134,22 @@ document.addEventListener(RENDER_EVENT, function () {
         completedBOOKList.append(bookElement);
       }
     }
+  }
+  else {
+    for (const bookItem of books) {
+      const bookElement = makeBook(bookItem);
+
+      let curr = (bookItem.title).toLowerCase();
+      if (curr.includes(keyword)) {
+        if (!bookItem.isComplete) {
+          uncompletedBOOKList.append(bookElement);
+        } else {
+          completedBOOKList.append(bookElement);
+        }
+      }
+    }
+  }
+  
 });
 
 function findBook(bookId) {
@@ -135,7 +177,13 @@ function removeBook(bookId) {
   if (bookTarget === -1) return;
  
   books.splice(bookTarget, 1);
+
+  let curr = JSON.parse(localStorage.getItem(localTotalBookKey));
+  localStorage.removeItem(localTotalBookKey);
+  localStorage.setItem(localTotalBookKey, JSON.stringify(books));
+  
   document.dispatchEvent(new Event(RENDER_EVENT));
+  alert ("Berhasil menghapus buku!");
 }
  
 function finishBook (bookId) {
@@ -145,9 +193,11 @@ function finishBook (bookId) {
  
   bookTarget.isComplete = true;
 
-  const idx = findBookIndex(bookId);
-  console.log(books[idx]);
+  localStorage.removeItem(localTotalBookKey);
+  localStorage.setItem(localTotalBookKey, JSON.stringify(books));
+
   document.dispatchEvent(new Event(RENDER_EVENT));
+  alert ("Berhasil memindahkan buku!");
 }
  
 function unfinishBook(bookId) {
@@ -157,7 +207,9 @@ function unfinishBook(bookId) {
  
   bookTarget.isComplete = false;
   
-  const idx = findBookIndex(bookId);
-  console.log(books[idx]);
+  localStorage.removeItem(localTotalBookKey);
+  localStorage.setItem(localTotalBookKey, JSON.stringify(books));
+
   document.dispatchEvent(new Event(RENDER_EVENT));
+  alert ("Berhasil memindahkan buku!");
 }
