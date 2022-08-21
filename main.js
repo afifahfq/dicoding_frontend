@@ -1,7 +1,7 @@
 const localTotalBookKey = 'LOCAL_TOTAL_BOOKS';
 const localMaximumAttemptsKey = 'LOCAL_MAXIMUM_ATTEMPTS';
 
-let books;
+let books = [];
 let keyword = null;
 const RENDER_EVENT = 'render-book';
 
@@ -119,28 +119,16 @@ function makeBook(bookObject) {
 document.addEventListener(RENDER_EVENT, function () {
   books = JSON.parse(localStorage.getItem(localTotalBookKey));
 
-  const uncompletedBOOKList = document.getElementById('incompleteBookshelfList');
-  uncompletedBOOKList.innerHTML = '';
+  if (books != null) {
+    const uncompletedBOOKList = document.getElementById('incompleteBookshelfList');
+    uncompletedBOOKList.innerHTML = '';
 
-  const completedBOOKList = document.getElementById('completeBookshelfList');
-  completedBOOKList.innerHTML = '';
-  
-  if (keyword == null || keyword == ""){  
-    for (const bookItem of books) {
-      const bookElement = makeBook(bookItem);
-      if (!bookItem.isComplete) {
-        uncompletedBOOKList.append(bookElement);
-      } else {
-        completedBOOKList.append(bookElement);
-      }
-    }
-  }
-  else {
-    for (const bookItem of books) {
-      const bookElement = makeBook(bookItem);
-
-      let curr = (bookItem.title).toLowerCase();
-      if (curr.includes(keyword)) {
+    const completedBOOKList = document.getElementById('completeBookshelfList');
+    completedBOOKList.innerHTML = '';
+    
+    if (keyword == null || keyword == ""){  
+      for (const bookItem of books) {
+        const bookElement = makeBook(bookItem);
         if (!bookItem.isComplete) {
           uncompletedBOOKList.append(bookElement);
         } else {
@@ -148,6 +136,25 @@ document.addEventListener(RENDER_EVENT, function () {
         }
       }
     }
+    else {
+      for (const bookItem of books) {
+        const bookElement = makeBook(bookItem);
+
+        let curr = (bookItem.title).toLowerCase();
+        if (curr.includes(keyword)) {
+          if (!bookItem.isComplete) {
+            uncompletedBOOKList.append(bookElement);
+          } else {
+            completedBOOKList.append(bookElement);
+          }
+        }
+      }
+    }
+  }
+  else {
+    let curr = [];
+    localStorage.removeItem(localTotalBookKey);
+    localStorage.setItem(localTotalBookKey, JSON.stringify(curr));
   }
   
 });
