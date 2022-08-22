@@ -23,19 +23,26 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 
 function addBook() {
-    const titleBook = document.getElementById('inputBookTitle').value;
-    const authorBook = document.getElementById('inputBookAuthor').value;
-    const yearBook = document.getElementById('inputBookYear').value;
-    const completeBook = document.getElementById('inputBookIsComplete').checked;
-   
-    const generatedID = generateId();
-    const bookObject = generateBookObject(generatedID, titleBook, authorBook, yearBook, completeBook);
-    books.push(bookObject);
-
+  if (books == null) {
+    let curr = [];
     localStorage.removeItem(localTotalBookKey);
-    localStorage.setItem(localTotalBookKey, JSON.stringify(books));
-   
-    document.dispatchEvent(new Event(RENDER_EVENT));
+    localStorage.setItem(localTotalBookKey, JSON.stringify(curr));
+  }
+
+  const titleBook = document.getElementById('inputBookTitle').value;
+  const authorBook = document.getElementById('inputBookAuthor').value;
+  const yearBook = document.getElementById('inputBookYear').value;
+  const completeBook = document.getElementById('inputBookIsComplete').checked;
+  
+  const generatedID = generateId();
+  const bookObject = generateBookObject(generatedID, titleBook, authorBook, yearBook, completeBook);
+  console.log(books);
+  books.push(bookObject);
+
+  localStorage.removeItem(localTotalBookKey);
+  localStorage.setItem(localTotalBookKey, JSON.stringify(books));
+  
+  document.dispatchEvent(new Event(RENDER_EVENT));
 }
 
 function search() {
